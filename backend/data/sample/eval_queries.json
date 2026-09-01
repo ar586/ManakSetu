@@ -1,0 +1,58 @@
+[
+  {
+    "query": "outdoor LED street light for road lighting",
+    "expected_standard_ids": ["TEST-001"]
+  },
+  {
+    "query": "safety requirements for electrical lighting equipment",
+    "expected_standard_ids": ["TEST-002", "TEST-013"]
+  },
+  {
+    "query": "construction materials and specifications",
+    "expected_standard_ids": ["TEST-003", "TEST-011", "TEST-014"]
+  },
+  {
+    "query": "concrete specifications for structures",
+    "expected_standard_ids": ["TEST-003"]
+  },
+  {
+    "query": "protective equipment for workers",
+    "expected_standard_ids": ["TEST-005"]
+  },
+  {
+    "query": "LED luminaire efficacy and performance",
+    "expected_standard_ids": ["TEST-001", "TEST-012"]
+  },
+  {
+    "query": "textile quality and strength testing",
+    "expected_standard_ids": ["TEST-006"]
+  },
+  {
+    "query": "edible oils purity and safety",
+    "expected_standard_ids": ["TEST-007"]
+  },
+  {
+    "query": "automotive engine lubricating oils",
+    "expected_standard_ids": ["TEST-008"]
+  },
+  {
+    "query": "mechanical power transmission systems",
+    "expected_standard_ids": ["TEST-009"]
+  },
+  {
+    "query": "potable water quality testing and standards",
+    "expected_standard_ids": ["TEST-010"]
+  },
+  {
+    "query": "steel reinforcement bars for concrete",
+    "expected_standard_ids": ["TEST-011"]
+  },
+  {
+    "query": "electrical cable insulation and safety",
+    "expected_standard_ids": ["TEST-013"]
+  },
+  {
+    "query": "सड़क के लिए एलईडी लाइट",
+    "expected_standard_ids": ["TEST-001"]
+  }
+]

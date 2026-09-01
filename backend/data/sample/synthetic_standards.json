@@ -1,0 +1,167 @@
+[
+  {
+    "standard_id": "TEST-001",
+    "standard_number": "TEST-STANDARD-001",
+    "title": "LED Street Lighting",
+    "scope": "Requirements for LED luminaires used for road and street lighting.",
+    "description": "Specifies performance and safety requirements for outdoor LED street lighting. Covers efficacy, color rendering, thermal management, and electrical safety.",
+    "sector": "Lighting",
+    "status": "Active",
+    "publication_year": 2020,
+    "latest_revision": 2023
+  },
+  {
+    "standard_id": "TEST-002",
+    "standard_number": "TEST-STANDARD-002",
+    "title": "Electrical Safety for Lighting Equipment",
+    "scope": "Safety requirements for electrical lighting equipment.",
+    "description": "Specifies electrical safety requirements, safety tests, and protection mechanisms for lighting devices. Covers IP65/IP66 enclosures and outdoor applications.",
+    "sector": "Electrical Safety",
+    "status": "Active",
+    "publication_year": 2019,
+    "latest_revision": 2022
+  },
+  {
+    "standard_id": "TEST-003",
+    "standard_number": "TEST-STANDARD-003",
+    "title": "Concrete for Construction",
+    "scope": "Specifications for concrete used in building and construction.",
+    "description": "Defines quality requirements for concrete, compressive strength testing, and durability criteria. Includes mix designs for different environmental conditions.",
+    "sector": "Construction",
+    "status": "Active",
+    "publication_year": 2018,
+    "latest_revision": 2023
+  },
+  {
+    "standard_id": "TEST-004",
+    "standard_number": "TEST-STANDARD-004",
+    "title": "Portland Cement Specifications",
+    "scope": "Quality and performance requirements for Portland cement.",
+    "description": "Specifies physical and chemical properties of Portland cement, testing procedures, and packaging requirements.",
+    "sector": "Cement",
+    "status": "Active",
+    "publication_year": 2017,
+    "latest_revision": 2021
+  },
+  {
+    "standard_id": "TEST-005",
+    "standard_number": "TEST-STANDARD-005",
+    "title": "Personal Protective Equipment - Safety Helmets",
+    "scope": "Requirements for protective safety helmets used in construction and industrial environments.",
+    "description": "Covers design, materials, testing, and certification of safety helmets. Includes impact resistance and retention system specifications.",
+    "sector": "Protective Equipment",
+    "status": "Active",
+    "publication_year": 2020,
+    "latest_revision": 2023
+  },
+  {
+    "standard_id": "TEST-006",
+    "standard_number": "TEST-STANDARD-006",
+    "title": "Cotton Textiles - Quality Control",
+    "scope": "Quality parameters and testing methods for cotton textile products.",
+    "description": "Defines strength requirements, dimensional stability, color fastness, and safety requirements for cotton fabrics and garments.",
+    "sector": "Textiles",
+    "status": "Active",
+    "publication_year": 2019,
+    "latest_revision": 2022
+  },
+  {
+    "standard_id": "TEST-007",
+    "standard_number": "TEST-STANDARD-007",
+    "title": "Food Safety and Quality - Edible Oils",
+    "scope": "Safety and quality standards for edible oils and fats.",
+    "description": "Specifies purity requirements, testing methods for contaminants, and packaging standards for edible oils including coconut, palm, and groundnut oils.",
+    "sector": "Food",
+    "status": "Active",
+    "publication_year": 2021,
+    "latest_revision": 2023
+  },
+  {
+    "standard_id": "TEST-008",
+    "standard_number": "TEST-STANDARD-008",
+    "title": "Automotive Lubricating Oils",
+    "scope": "Requirements for lubricating oils used in automotive engines.",
+    "description": "Defines viscosity, thermal stability, corrosion protection, and performance metrics for engine oils. Includes testing procedures and quality grades.",
+    "sector": "Automotive",
+    "status": "Active",
+    "publication_year": 2018,
+    "latest_revision": 2022
+  },
+  {
+    "standard_id": "TEST-009",
+    "standard_number": "TEST-STANDARD-009",
+    "title": "Mechanical Power Transmission - Belt Drives",
+    "scope": "Design and specifications for belt drive systems.",
+    "description": "Covers V-belt and flat belt specifications, pulley design, safety factors, and installation requirements for mechanical power transmission systems.",
+    "sector": "Mechanical Equipment",
+    "status": "Active",
+    "publication_year": 2017,
+    "latest_revision": 2021
+  },
+  {
+    "standard_id": "TEST-010",
+    "standard_number": "TEST-STANDARD-010",
+    "title": "Water Quality and Testing",
+    "scope": "Potable water quality parameters and testing methods.",
+    "description": "Specifies physical, chemical, and microbiological parameters for drinking water, testing procedures, and acceptable limits for contaminants.",
+    "sector": "Water Systems",
+    "status": "Active",
+    "publication_year": 2020,
+    "latest_revision": 2023
+  },
+  {
+    "standard_id": "TEST-011",
+    "standard_number": "TEST-STANDARD-011",
+    "title": "Steel Rebar for Reinforced Concrete",
+    "scope": "Specifications for steel reinforcing bars used in concrete structures.",
+    "description": "Defines mechanical properties, chemical composition, dimensional tolerances, and testing procedures for reinforcing steel bars.",
+    "sector": "Construction",
+    "status": "Active",
+    "publication_year": 2019,
+    "latest_revision": 2022
+  },
+  {
+    "standard_id": "TEST-012",
+    "standard_number": "TEST-STANDARD-012",
+    "title": "LED Bulb Efficiency and Performance",
+    "scope": "Energy efficiency and performance requirements for LED bulbs.",
+    "description": "Specifies luminous flux, color temperature, lifespan, and power consumption limits for LED lighting products. Includes labeling requirements.",
+    "sector": "Lighting",
+    "status": "Active",
+    "publication_year": 2021,
+    "latest_revision": 2023
+  },
+  {
+    "standard_id": "TEST-013",
+    "standard_number": "TEST-STANDARD-013",
+    "title": "Electrical Cable Specifications",
+    "scope": "Requirements for electrical cables used in power distribution and building wiring.",
+    "description": "Covers insulation materials, voltage ratings, temperature ratings, testing procedures, and safety specifications for electrical cables. IP66 rated outdoor cables included.",
+    "sector": "Electrical Safety",
+    "status": "Active",
+    "publication_year": 2020,
+    "latest_revision": 2023
+  },
+  {
+    "standard_id": "TEST-014",
+    "standard_number": "TEST-STANDARD-014",
+    "title": "Safety Glass and Glazing",
+    "scope": "Requirements for tempered and safety glass used in construction.",
+    "description": "Defines impact resistance, thermal stress resistance, and fragmentation characteristics for safety glazing materials.",
+    "sector": "Construction",
+    "status": "Active",
+    "publication_year": 2018,
+    "latest_revision": 2021
+  },
+  {
+    "standard_id": "TEST-015",
+    "standard_number": "TEST-STANDARD-015",
+    "title": "Copper and Brass Fittings",
+    "scope": "Quality specifications for copper and brass fittings used in plumbing and HVAC.",
+    "description": "Specifies material composition, dimensional tolerances, pressure ratings, and corrosion resistance requirements for plumbing fittings.",
+    "sector": "Plumbing",
+    "status": "Active",
+    "publication_year": 2017,
+    "latest_revision": 2020
+  }
+]
