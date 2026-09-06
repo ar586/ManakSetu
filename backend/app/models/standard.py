@@ -11,4 +11,5 @@ class Standard(Base):
     publication_date = Column(Date, nullable=True)
     latest_version = Column(String, nullable=True)
     mandatory_certification = Column(String, nullable=True) # e.g. BIS, CRS, Hallmarking
+    download_link = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)

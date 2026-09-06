@@ -9,6 +9,7 @@ class StandardBase(BaseModel):
     publication_date: Optional[date] = None
     latest_version: Optional[str] = None
     mandatory_certification: Optional[str] = None
+    download_link: Optional[str] = None
     is_active: bool = True
 
 class StandardCreate(StandardBase):
