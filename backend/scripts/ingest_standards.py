@@ -37,12 +37,18 @@ def generate_stable_id(standard_number: str) -> int:
 def load_csv(file_path: str) -> List[Dict[str, str]]:
     logger.info(f"Loading CSV file: {file_path}")
     records = []
+    seen_ids = set()
     with open(file_path, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
-            if row.get('is_code') and row.get('description'):
-                records.append(row)
-    logger.info(f"Loaded {len(records)} records from CSV")
+            is_code = row.get('is_code', '').strip()
+            if is_code and row.get('description'):
+                if is_code not in seen_ids:
+                    records.append(row)
+                    seen_ids.add(is_code)
+                else:
+                    logger.warning(f"Skipping duplicate is_code in CSV: {is_code}")
+    logger.info(f"Loaded {len(records)} unique records from CSV")
     return records
 
 def ingest_standards(file_path: str, batch_size: int = 64):

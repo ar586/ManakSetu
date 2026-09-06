@@ -32,6 +32,8 @@ services:
     environment:
       - POSTGRES_SERVER=postgres
       - QDRANT_URL=http://qdrant:6333
+    env_file:
+      - .env
     volumes:
       - .:/app
     depends_on:
