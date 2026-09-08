@@ -192,3 +192,33 @@ export async function getStandardById(id) {
     return found || null;
   }
 }
+
+export async function getStandardSummary(id) {
+  const res = await fetch(`${BASE_URL}${API_PREFIX}/standards/${encodeURIComponent(id)}/summary`);
+  if (!res.ok) throw new Error(`Summary failed with status ${res.status}`);
+  return res.json();
+}
+
+export async function chatWithStandard(id, payload) {
+  const res = await fetch(`${BASE_URL}${API_PREFIX}/standards/${encodeURIComponent(id)}/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({}));
+    throw new Error(detail.detail || `Chat failed with status ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function analyzeDocument(file) {
+  const body = new FormData();
+  body.append("file", file);
+  const res = await fetch(`${BASE_URL}${API_PREFIX}/search/document`, { method: "POST", body });
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({}));
+    throw new Error(detail.detail || `Document analysis failed with status ${res.status}`);
+  }
+  return res.json();
+}

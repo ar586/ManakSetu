@@ -14,7 +14,7 @@ export default function SearchError({ onRetry }) {
           Something went wrong.
         </h3>
         <p className="text-sm text-slate-600 leading-relaxed">
-          We couldn't complete the search. Please check your connection and try again.
+          We couldn&apos;t complete the search. Please check your connection and try again.
         </p>
       </div>
 

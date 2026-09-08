@@ -17,4 +17,10 @@ class Settings(BaseSettings):
     QDRANT_URL: str = os.getenv("QDRANT_URL", "http://localhost:6333")
     QDRANT_COLLECTION: str = os.getenv("QDRANT_COLLECTION", "indian_standards")
 
+    # AI generation is optional in local development. When configured, the
+    # OpenAI-compatible provider is used for summaries, chat, and analysis.
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    OPENAI_MODEL: str = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+    OPENAI_BASE_URL: str = os.getenv("OPENAI_BASE_URL", "")
+
 settings = Settings()

@@ -11,11 +11,16 @@ import {
   CheckCircle2, 
   XCircle,
   FileQuestion,
-  ExternalLink
+  ExternalLink,
+  MessageCircle,
+  Send,
+  Bot,
+  User,
+  Sparkles
 } from "lucide-react";
 import gsap from "gsap";
 import MetadataItem from "@/components/MetadataItem";
-import { getStandardById } from "@/lib/api";
+import { chatWithStandard, getStandardById, getStandardSummary } from "@/lib/api";
 import { formatDate } from "@/lib/utils";
 
 export default function StandardDetailPage({ params: paramsPromise }) {
@@ -25,6 +30,13 @@ export default function StandardDetailPage({ params: paramsPromise }) {
   const [standard, setStandard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [summary, setSummary] = useState("");
+  const [summaryLoading, setSummaryLoading] = useState(true);
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatInput, setChatInput] = useState("");
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatSources, setChatSources] = useState({});
+  const [chatLoading, setChatLoading] = useState(false);
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -48,6 +60,33 @@ export default function StandardDetailPage({ params: paramsPromise }) {
     }
     loadStandard();
   }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+    getStandardSummary(id)
+      .then((data) => setSummary(data.summary || "No AI summary is available yet."))
+      .catch(() => setSummary("AI summary is unavailable for this standard right now."))
+      .finally(() => setSummaryLoading(false));
+  }, [id]);
+
+  const sendChatMessage = async (event) => {
+    event.preventDefault();
+    const content = chatInput.trim();
+    if (!content || chatLoading) return;
+    const nextMessages = [...chatMessages, { role: "user", content }];
+    setChatMessages(nextMessages);
+    setChatInput("");
+    setChatLoading(true);
+    try {
+      const data = await chatWithStandard(id, { chat_history: nextMessages, new_message: content });
+      setChatMessages([...nextMessages, { role: "assistant", content: data.answer }]);
+      setChatSources((previous) => ({ ...previous, [nextMessages.length]: data.sources || [] }));
+    } catch (error) {
+      setChatMessages([...nextMessages, { role: "assistant", content: error.message || "The document assistant is unavailable." }]);
+    } finally {
+      setChatLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (loading || notFound || !standard || !containerRef.current) return;
@@ -160,6 +199,16 @@ export default function StandardDetailPage({ params: paramsPromise }) {
                 No official description text available for this standard.
               </p>
             )}
+
+            <div className="mt-8 border-t border-slate-100 pt-6">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="w-4 h-4 text-blue-600" />
+                <h2 className="text-sm font-mono font-bold text-blue-700 uppercase tracking-widest">AI SUMMARY</h2>
+              </div>
+              {summaryLoading ? (
+                <div className="space-y-3 animate-pulse"><div className="h-3 bg-slate-200 rounded w-11/12" /><div className="h-3 bg-slate-200 rounded w-4/5" /><div className="h-3 bg-slate-200 rounded w-3/5" /></div>
+              ) : <div className="whitespace-pre-line text-sm text-slate-700 leading-relaxed">{summary}</div>}
+            </div>
           </div>
 
           {/* Download CTA if download_link exists */}
@@ -225,6 +274,20 @@ export default function StandardDetailPage({ params: paramsPromise }) {
           </div>
         </div>
       </div>
+
+      <button type="button" onClick={() => setChatOpen((open) => !open)} className="fixed bottom-6 right-6 z-30 inline-flex items-center gap-2 rounded-full bg-slate-950 px-5 py-3 text-sm font-bold text-white shadow-xl hover:bg-blue-600 transition-colors">
+        <MessageCircle className="w-4 h-4" /> Chat with Document
+      </button>
+
+      {chatOpen && <section className="fixed bottom-20 right-6 z-30 w-[min(92vw,380px)] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+        <header className="flex items-center justify-between bg-slate-950 px-4 py-3 text-white"><span className="flex items-center gap-2 text-sm font-bold"><Bot className="w-4 h-4" /> Standard assistant</span><button type="button" onClick={() => setChatOpen(false)} aria-label="Close chat">×</button></header>
+        <div className="max-h-80 space-y-3 overflow-y-auto p-4">
+          {chatMessages.length === 0 && <p className="text-xs text-slate-500">Ask a question about this standard.</p>}
+          {chatMessages.map((message, index) => <div key={`${message.role}-${index}`} className={`flex gap-2 text-sm ${message.role === "user" ? "justify-end" : "justify-start"}`}><span className={`max-w-[85%] rounded-xl px-3 py-2 ${message.role === "user" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700"}`}>{message.role === "user" ? <User className="mr-1 inline h-3 w-3" /> : <Bot className="mr-1 inline h-3 w-3" />}{message.content}{message.role === "assistant" && chatSources[index]?.length > 0 && <span className="mt-2 block border-t border-slate-300 pt-2 text-[10px] text-slate-500">Sources: {chatSources[index].map((source, sourceIndex) => <span key={sourceIndex} className="mr-2">{[source.standard_number || source.standard_id, source.source_document, source.section && `section ${source.section}`, source.clause && `clause ${source.clause}`, source.page && `page ${source.page}`].filter(Boolean).join(" · ")}</span>)}</span>}</span></div>)}
+          {chatLoading && <p className="text-xs text-slate-400 animate-pulse">Reading the standard...</p>}
+        </div>
+        <form onSubmit={sendChatMessage} className="flex gap-2 border-t border-slate-100 p-3"><input value={chatInput} onChange={(event) => setChatInput(event.target.value)} placeholder="Ask about a clause..." className="min-w-0 flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-blue-500" /><button type="submit" aria-label="Send message" className="rounded-lg bg-blue-600 p-2 text-white disabled:opacity-50" disabled={chatLoading || !chatInput.trim()}><Send className="h-4 w-4" /></button></form>
+      </section>}
     </div>
   );
 }

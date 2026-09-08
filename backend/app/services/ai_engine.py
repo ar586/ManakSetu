@@ -7,8 +7,10 @@ Handles model loading, caching, and batch processing for efficiency.
 
 import logging
 import os
+import json
 from typing import List, Optional
 import numpy as np
+from app.services.llm_service import get_llm_service
 
 logger = logging.getLogger(__name__)
 
@@ -305,6 +307,59 @@ class AIEngine:
         except Exception as e:
             logger.error(f"Similarity calculation failed: {e}")
             raise RuntimeError(f"Failed to calculate similarity: {e}")
+
+    def generate(self, system_prompt: str, user_prompt: str, fallback: str = "") -> str:
+        """Delegate generation to the backend-only LLM provider service."""
+        return get_llm_service().generate(system_prompt, user_prompt)
+
+    def summarize_standard(self, standard_text: str) -> str:
+        return self.generate(
+            "You summarize Indian Standards for civil engineers. Be precise and concise.",
+            "Summarize the following Indian Standard in 3-4 bullet points for a civil engineer.\n\n"
+            + standard_text[:24000],
+        )
+
+    def answer_from_context(self, context: list[dict], history: list, question: str) -> str:
+        """Answer strictly from retrieved Qdrant chunks."""
+        if not context:
+            return "The available standard content does not provide enough information to answer that question."
+        context_text = "\n\n".join(
+            "SOURCE " + str(index + 1) + ": " + item["text"]
+            + "\nMETADATA: " + ", ".join(
+                f"{key}={item[key]}" for key in ("standard_id", "standard_number", "source_document", "section", "clause", "page", "chunk_id")
+                if item.get(key) is not None
+            )
+            for index, item in enumerate(context)
+        )
+        history_text = "\n".join(
+            f"{message.get('role', 'user')}: {message.get('content', '')}" for message in history[-8:]
+        )
+        return self.generate(
+            "You are an expert on Indian Standards. Answer ONLY from the retrieved source content. "
+            "If it does not support the answer, explicitly say: 'The available standard content does not provide enough information.' "
+            "Never invent clauses, sections, pages, or requirements.",
+            f"RETRIEVED STANDARD CONTENT:\n{context_text}\n\nCHAT HISTORY:\n{history_text}\n\nQUESTION:\n{question}",
+        )
+    def analyze_compliance(self, tender_text: str, matched_standards: list[dict]) -> dict:
+        prompt = (
+            "Compare the requirements in the tender document against the matched Indian Standards. "
+            "Return ONLY valid JSON with keys summary, findings, conflicts, gaps, recommendations. "
+            "Each finding must contain tender_requirement, matched_standard, relevance_score, clause, section, page, "
+            "compliance_status, and explanation. compliance_status must be exactly one of compliant, non_compliant, "
+            "partially_compliant, or insufficient_evidence. Never infer compliance from similarity alone and never "
+            "invent source metadata.\n\n"
+            f"TENDER:\n{tender_text[:24000]}\n\nMATCHED STANDARDS:\n{json.dumps(matched_standards)[:18000]}"
+        )
+        result = get_llm_service().generate_json(
+            "You are a compliance analyst for Indian civil engineering tenders.",
+            prompt,
+        )
+        result.setdefault("summary", "The available evidence was insufficient for a definitive compliance conclusion.")
+        result.setdefault("findings", [])
+        result.setdefault("conflicts", [])
+        result.setdefault("gaps", [])
+        result.setdefault("recommendations", [])
+        return result
 
 
 # Module-level convenience functions

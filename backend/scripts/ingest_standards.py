@@ -26,6 +26,7 @@ from app.db.session import SessionLocal
 from app.models.standard import Standard
 from app.services.ai_engine import AIEngine
 from app.db.vector_store import VectorStore
+from app.utils.text_processing import chunk_text, clean_text
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -53,13 +54,13 @@ def load_csv(file_path: str) -> List[Dict[str, str]]:
     logger.info(f"Loaded {len(records)} unique records from CSV")
     return records
 
-def ingest_standards(file_path: str, batch_size: int = 64):
+def ingest_standards(file_path: str, batch_size: int = 64, recreate_collection: bool = False):
     logger.info("Initializing AI Engine and Vector Store...")
     ai_engine = AIEngine()
     vector_store = VectorStore()
     
     logger.info(f"Ensuring Qdrant collection with dimension: {ai_engine.dimension}")
-    vector_store.ensure_collection(ai_engine.dimension)
+    vector_store.ensure_collection(ai_engine.dimension, recreate=recreate_collection)
 
     records = load_csv(file_path)
     if not records:
@@ -82,7 +83,7 @@ def ingest_standards(file_path: str, batch_size: int = 64):
             # Prepare data
             for record in batch:
                 is_code = record['is_code'].strip()
-                description = record['description'].strip()
+                description = clean_text(record['description'].strip())
                 download_link = record.get('download_link', '').strip()
                 
                 # Extract publication year using regex
@@ -97,19 +98,21 @@ def ingest_standards(file_path: str, batch_size: int = 64):
                     except ValueError:
                         pass
                 
-                texts_to_embed.append(description)
-                
-                # Qdrant Point Prep
-                qdrant_points.append({
-                    "id": generate_stable_id(is_code),
-                    # "vector": will be added after embedding
-                    "payload": {
-                        "standard_id": is_code,
-                        "standard_number": is_code,
-                        "title": description,  # CSV uses description as the title/scope
-                        "description": description
-                    }
-                })
+                chunks = chunk_text(description, chunk_size=512, overlap=50, min_chunk_size=20) or [description]
+                for chunk_index, chunk in enumerate(chunks):
+                    texts_to_embed.append(chunk)
+                    qdrant_points.append({
+                        "id": generate_stable_id(f"{is_code}:{chunk_index}"),
+                        "payload": {
+                            "standard_id": is_code,
+                            "standard_number": is_code,
+                            "title": description,
+                            "description": description,
+                            "text": chunk,
+                            "chunk_id": f"{is_code}:{chunk_index}",
+                            "source_document": Path(file_path).name,
+                        }
+                    })
 
                 # Postgres Object Prep
                 postgres_objects.append(Standard(
@@ -117,6 +120,7 @@ def ingest_standards(file_path: str, batch_size: int = 64):
                     standard_number=is_code,
                     title=description,
                     description=description,
+                    source_text=description,
                     download_link=download_link,
                     latest_version=latest_version,
                     publication_date=publication_date
@@ -139,6 +143,7 @@ def ingest_standards(file_path: str, batch_size: int = 64):
                 else:
                     existing.title = std.title
                     existing.description = std.description
+                    existing.source_text = std.source_text
                     existing.download_link = std.download_link
                     existing.latest_version = std.latest_version
                     existing.publication_date = std.publication_date
@@ -163,10 +168,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Ingest CSV data to Postgres & Qdrant")
     parser.add_argument("--input", required=True, help="Path to CSV file")
     parser.add_argument("--batch-size", type=int, default=64)
+    parser.add_argument(
+        "--recreate-collection",
+        action="store_true",
+        help="Explicitly delete and rebuild the configured Qdrant collection; never enabled implicitly.",
+    )
     args = parser.parse_args()
     
     if not Path(args.input).exists():
         logger.error(f"File not found: {args.input}")
         sys.exit(1)
 
-    ingest_standards(args.input, args.batch_size)
+    ingest_standards(args.input, args.batch_size, args.recreate_collection)

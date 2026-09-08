@@ -8,6 +8,8 @@ class Standard(Base):
     standard_number = Column(String, index=True, nullable=False) # e.g. IS 1234
     title = Column(String, nullable=False)
     description = Column(Text, nullable=True)
+    source_text = Column(Text, nullable=True)
+    ai_summary = Column(Text, nullable=True)
     publication_date = Column(Date, nullable=True)
     latest_version = Column(String, nullable=True)
     mandatory_certification = Column(String, nullable=True) # e.g. BIS, CRS, Hallmarking

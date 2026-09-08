@@ -257,7 +257,8 @@ class VectorStore:
         self,
         query_vector: List[float],
         top_k: int = 5,
-        score_threshold: Optional[float] = None
+        score_threshold: Optional[float] = None,
+        standard_id: Optional[str] = None,
     ) -> List[SearchResult]:
         """
         Search for similar vectors.
@@ -289,12 +290,20 @@ class VectorStore:
             # Perform search using the current Qdrant query API.
             # `client.search(...)` was removed from recent Qdrant server/client
             # versions in favor of `client.query_points(...)`.
+            query_kwargs = {
+                "collection_name": self.collection_name,
+                "query": query_vector,
+                "limit": top_k,
+                "score_threshold": threshold if threshold > 0 else None,
+                "with_payload": True,
+            }
+            if standard_id and models is not None:
+                query_kwargs["query_filter"] = models.Filter(
+                    must=[models.FieldCondition(key="standard_id", match=models.MatchValue(value=standard_id))]
+                )
+
             query_response = self.client.query_points(
-                collection_name=self.collection_name,
-                query=query_vector,
-                limit=top_k,
-                score_threshold=threshold if threshold > 0 else None,
-                with_payload=True,
+                **query_kwargs,
             )
 
             # Convert results

@@ -11,7 +11,7 @@ class SearchService:
         self.ai_engine = get_engine()
         self.vector_store = VectorStore()
 
-    def semantic_search(self, query: str, top_k: int = 5, score_threshold: float = None) -> SearchResponse:
+    def semantic_search(self, query: str, top_k: int = 5, score_threshold: float = None, standard_id: str = None) -> SearchResponse:
         # 1. Embed the natural language query
         query_embedding = self.ai_engine.embed(query)
 
@@ -19,7 +19,8 @@ class SearchService:
         qdrant_results = self.vector_store.search(
             query_vector=query_embedding,
             top_k=top_k,
-            score_threshold=score_threshold
+            score_threshold=score_threshold,
+            standard_id=standard_id,
         )
 
         if not qdrant_results:
@@ -47,3 +48,27 @@ class SearchService:
         results.sort(key=lambda x: x.similarity_score, reverse=True)
 
         return SearchResponse(query=query, results=results)
+
+    def retrieve_context(self, query: str, standard_id: str, top_k: int = 5, score_threshold: float = 0.25) -> list[dict]:
+        """Retrieve only Qdrant content belonging to one standard."""
+        query_embedding = self.ai_engine.embed(query)
+        results = self.vector_store.search(
+            query_vector=query_embedding,
+            top_k=top_k,
+            score_threshold=score_threshold,
+            standard_id=standard_id,
+        )
+        return [
+            {
+                "text": result.payload.get("text") or result.payload.get("description") or result.title,
+                "score": result.score,
+                "standard_id": result.standard_id,
+                "standard_number": result.standard_number,
+                "source_document": result.payload.get("source_document"),
+                "section": result.payload.get("section"),
+                "clause": result.payload.get("clause"),
+                "page": result.payload.get("page"),
+                "chunk_id": result.payload.get("chunk_id"),
+            }
+            for result in results
+        ]

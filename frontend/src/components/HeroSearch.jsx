@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Search, Sparkles, ArrowRight, CornerDownLeft } from "lucide-react";
+import { Search, Sparkles, ArrowRight, CornerDownLeft, Upload, FileText, LoaderCircle } from "lucide-react";
 import gsap from "gsap";
+import { useRouter } from "next/navigation";
+import { analyzeDocument } from "@/lib/api";
 
 const EXAMPLE_QUERIES = [
   "Steel reinforcement requirements for residential construction",
@@ -13,6 +15,12 @@ const EXAMPLE_QUERIES = [
 
 export default function HeroSearch({ onSearch, isSearching }) {
   const [query, setQuery] = useState("");
+  const [mode, setMode] = useState("text");
+  const [file, setFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadStep, setUploadStep] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
+  const router = useRouter();
   const heroRef = useRef(null);
   const searchContainerRef = useRef(null);
 
@@ -65,6 +73,44 @@ export default function HeroSearch({ onSearch, isSearching }) {
     onSearch(example);
   };
 
+  const handleDocumentSubmit = async (event) => {
+    event.preventDefault();
+    if (!file || uploading) return;
+    setUploading(true);
+    setUploadStep("Extracting text...");
+    try {
+      const result = await analyzeDocument(file);
+      setUploadStep("Finding standards...");
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      setUploadStep("Analyzing compliance...");
+      sessionStorage.setItem("manaksetu-analysis", JSON.stringify(result));
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      router.push("/analyze");
+    } catch (error) {
+      setUploadStep(error.message || "Upload failed. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const acceptFile = (candidate) => {
+    if (!candidate) return;
+    const allowed = ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+    const validExtension = /\.(pdf|docx)$/i.test(candidate.name);
+    if (!validExtension || (candidate.type && !allowed.includes(candidate.type))) {
+      setFile(null);
+      setUploadStep("Only valid PDF or DOCX files are supported.");
+      return;
+    }
+    if (candidate.size > 15 * 1024 * 1024) {
+      setFile(null);
+      setUploadStep("The document must be smaller than 15 MB.");
+      return;
+    }
+    setUploadStep("");
+    setFile(candidate);
+  };
+
   return (
     <section ref={heroRef} className="pt-32 pb-16 md:pt-40 md:pb-20 px-4 max-w-5xl mx-auto flex flex-col items-center text-center space-y-8 relative z-10">
       {/* Supporting Badge */}
@@ -90,7 +136,12 @@ export default function HeroSearch({ onSearch, isSearching }) {
       </div>
 
       {/* Primary Search Container (Visual Centerpiece) */}
-      <form
+      <div className="flex rounded-full border border-slate-200 bg-white/80 p-1 text-xs font-bold shadow-sm">
+        <button type="button" onClick={() => setMode("text")} className={`rounded-full px-4 py-2 transition-colors ${mode === "text" ? "bg-slate-950 text-white" : "text-slate-500"}`}>Text Search</button>
+        <button type="button" onClick={() => setMode("document")} className={`rounded-full px-4 py-2 transition-colors ${mode === "document" ? "bg-blue-600 text-white" : "text-slate-500"}`}>Document Upload</button>
+      </div>
+
+      {mode === "text" ? <form
         ref={searchContainerRef}
         onSubmit={handleSubmit}
         className="w-full max-w-3xl group bg-white border-2 border-slate-200 focus-within:border-blue-600 rounded-3xl p-3 md:p-4 shadow-xl shadow-slate-950/5 focus-within:shadow-2xl focus-within:shadow-blue-500/10 transition-all duration-300 relative overflow-hidden"
@@ -127,7 +178,19 @@ export default function HeroSearch({ onSearch, isSearching }) {
           </div>
           <span>AI Vector Index • 10,000+ BIS Specs</span>
         </div>
-      </form>
+      </form> : <form onSubmit={handleDocumentSubmit} onDragOver={(event) => { event.preventDefault(); setIsDragging(true); }} onDragLeave={() => setIsDragging(false)} onDrop={(event) => { event.preventDefault(); setIsDragging(false); acceptFile(event.dataTransfer.files?.[0]); }} className={`w-full max-w-3xl rounded-3xl border-2 border-dashed p-8 shadow-xl shadow-blue-950/5 transition-colors ${isDragging ? "border-blue-600 bg-blue-100" : "border-blue-200 bg-blue-50/50"}`}>
+        <label htmlFor="tender-file" className="flex cursor-pointer flex-col items-center gap-3 text-center">
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-blue-600 shadow-sm"><Upload className="h-5 w-5" /></span>
+          <span className="text-sm font-bold text-slate-900">Drop a tender or project specification here</span>
+          <span className="text-xs text-slate-500">Drop here or browse. PDF or DOCX, up to 15 MB</span>
+          <input id="tender-file" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="sr-only" onChange={(event) => acceptFile(event.target.files?.[0])} />
+          {file && <span className="flex items-center gap-2 text-xs font-semibold text-blue-700"><FileText className="h-4 w-4" />{file.name}</span>}
+        </label>
+        <button type="submit" disabled={!file || uploading} className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-blue-700 disabled:opacity-50">
+          {uploading && <LoaderCircle className="h-4 w-4 animate-spin" />}{uploading ? uploadStep : "Analyze Tender"}
+        </button>
+        {uploadStep && !uploading && <p className="mt-3 text-xs text-rose-600">{uploadStep}</p>}
+      </form>}
 
       {/* Suggested Prompt Chips */}
       <div className="w-full max-w-3xl flex flex-wrap items-center justify-center gap-2 pt-2">
