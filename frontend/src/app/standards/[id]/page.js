@@ -20,7 +20,7 @@ import { formatDate } from "@/lib/utils";
 
 export default function StandardDetailPage({ params: paramsPromise }) {
   const params = use(paramsPromise);
-  const id = params?.id;
+  const id = params?.id ? decodeURIComponent(params.id) : null;
 
   const [standard, setStandard] = useState(null);
   const [loading, setLoading] = useState(true);
