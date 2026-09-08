@@ -15,6 +15,8 @@ import hashlib
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 import time
+import re
+from datetime import date
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -83,6 +85,18 @@ def ingest_standards(file_path: str, batch_size: int = 64):
                 description = record['description'].strip()
                 download_link = record.get('download_link', '').strip()
                 
+                # Extract publication year using regex
+                latest_version = None
+                publication_date = None
+                year_match = re.search(r':\s*(\d{4})', is_code)
+                if year_match:
+                    year_str = year_match.group(1)
+                    latest_version = year_str
+                    try:
+                        publication_date = date(int(year_str), 1, 1)
+                    except ValueError:
+                        pass
+                
                 texts_to_embed.append(description)
                 
                 # Qdrant Point Prep
@@ -103,7 +117,9 @@ def ingest_standards(file_path: str, batch_size: int = 64):
                     standard_number=is_code,
                     title=description,
                     description=description,
-                    download_link=download_link
+                    download_link=download_link,
+                    latest_version=latest_version,
+                    publication_date=publication_date
                 ))
 
             # 1. Embed and Upsert to Qdrant
@@ -124,6 +140,8 @@ def ingest_standards(file_path: str, batch_size: int = 64):
                     existing.title = std.title
                     existing.description = std.description
                     existing.download_link = std.download_link
+                    existing.latest_version = std.latest_version
+                    existing.publication_date = std.publication_date
             
             db.commit()
             upserted_postgres += len(postgres_objects)
