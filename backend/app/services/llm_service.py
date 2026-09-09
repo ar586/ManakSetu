@@ -28,7 +28,7 @@ class LLMService:
     def generate(self, system_prompt: str, user_prompt: str) -> str:
         if not self.api_key:
             raise LLMConfigurationError("LLM API key is not configured on the backend")
-        if self.provider != "openai":
+        if self.provider not in ["openai", "groq"]:
             raise LLMConfigurationError(f"Unsupported LLM provider: {self.provider}")
         global OpenAI
         if OpenAI is None:
@@ -42,8 +42,13 @@ class LLMService:
 
         try:
             kwargs: dict[str, Any] = {"api_key": self.api_key}
-            if self.base_url:
+            
+            # Configure base_url for Groq compatibility
+            if self.provider == "groq" and not self.base_url:
+                kwargs["base_url"] = "https://api.groq.com/openai/v1"
+            elif self.base_url:
                 kwargs["base_url"] = self.base_url
+                
             client = OpenAI(**kwargs)
             response = client.chat.completions.create(
                 model=self.model,
