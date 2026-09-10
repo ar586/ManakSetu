@@ -53,6 +53,7 @@ class LLMService:
             response = client.chat.completions.create(
                 model=self.model,
                 temperature=0.2,
+                max_tokens=512,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt},
@@ -61,11 +62,17 @@ class LLMService:
             content = response.choices[0].message.content
             if not content:
                 raise LLMGenerationError("The LLM returned an empty response")
+                
+            import re
+            content = re.sub(r'<think>.*?</think>', '', content, flags=re.DOTALL)
+            
             return content.strip()
         except LLMGenerationError:
             raise
         except Exception as exc:
             logger.warning("LLM provider request failed: %s", exc.__class__.__name__)
+            if hasattr(exc, "response"):
+                logger.error(f"Error detail: {exc.response.text}")
             raise LLMGenerationError("The LLM provider could not complete the request") from exc
 
     def generate_json(self, system_prompt: str, user_prompt: str) -> dict[str, Any]:

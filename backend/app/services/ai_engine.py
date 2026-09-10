@@ -319,25 +319,29 @@ class AIEngine:
             + standard_text[:24000],
         )
 
-    def answer_from_context(self, context: list[dict], history: list, question: str) -> str:
-        """Answer strictly from retrieved Qdrant chunks."""
-        if not context:
-            return "The available standard content does not provide enough information to answer that question."
-        context_text = "\n\n".join(
-            "SOURCE " + str(index + 1) + ": " + item["text"]
-            + "\nMETADATA: " + ", ".join(
-                f"{key}={item[key]}" for key in ("standard_id", "standard_number", "source_document", "section", "clause", "page", "chunk_id")
-                if item.get(key) is not None
+    def answer_from_context(self, context: list[dict], history: list, question: str, standard_metadata: str = "") -> str:
+        """Answer using retrieved Qdrant chunks and general knowledge."""
+        context_text = ""
+        if context:
+            context_text = "\n\n".join(
+                "SOURCE " + str(index + 1) + ": " + item["text"]
+                + "\nMETADATA: " + ", ".join(
+                    f"{key}={item[key]}" for key in ("standard_id", "standard_number", "source_document", "section", "clause", "page", "chunk_id")
+                    if item.get(key) is not None
+                )
+                for index, item in enumerate(context)
             )
-            for index, item in enumerate(context)
-        )
+        else:
+            context_text = "No direct text chunks retrieved."
+            
         history_text = "\n".join(
             f"{message.get('role', 'user')}: {message.get('content', '')}" for message in history[-8:]
         )
         return self.generate(
-            "You are an expert on Indian Standards. Answer ONLY from the retrieved source content. "
-            "If it does not support the answer, explicitly say: 'The available standard content does not provide enough information.' "
-            "Never invent clauses, sections, pages, or requirements.",
+            "You are an expert on Indian Standards and civil engineering. "
+            "Use the provided context to answer the user's question if possible. "
+            "If the provided context is insufficient, you are allowed to use your pre-trained knowledge to provide a helpful, accurate answer. "
+            "When using your general knowledge, be helpful but advise the user to consult the official standard document for exact clauses.",
             f"RETRIEVED STANDARD CONTENT:\n{context_text}\n\nCHAT HISTORY:\n{history_text}\n\nQUESTION:\n{question}",
         )
     def analyze_compliance(self, tender_text: str, matched_standards: list[dict]) -> dict:

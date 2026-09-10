@@ -12,28 +12,26 @@ This repository contains the source code for our submission to the Smart India H
 
 ## 2. Problem Statement
 
-Organizations and procurement divisions struggle to accurately identify the applicable Indian Standards (IS) for complex technical procurement specifications. The manual process is extremely slow, error-prone, and relies heavily on domain experts parsing through hundreds of dense PDF documents to find the correct specifications and certification requirements.
+Organizations and procurement divisions struggle to identify the correct and most up-to-date Indian Standards (IS) for complex technical procurement specifications. Sifting through hundreds of pages of unstructured technical documents and relying on traditional keyword searches often leads to critical compliance gaps, outdated information, and procurement delays.
 
 ## 3. Proposed Solution
 
-ManakSetu is an end-to-end AI-powered recommendation engine. Users can either perform intelligent semantic searches for specific materials/processes, or upload an entire procurement/tender document. Our system automatically extracts the text using OCR, generates vector embeddings, and performs a semantic search against the official Bureau of Indian Standards (BIS) database to instantly recommend all applicable standards, complete with an AI-generated compliance analysis.
+ManakSetu is an end-to-end AI-powered procurement assistant designed to perform semantic retrieval, requirement mapping, and compliance analysis. Users can upload raw tender specifications or provide natural language descriptions. The system extracts technical parameters, translates them into high-dimensional semantic vectors using a local HuggingFace MiniLM model, and queries a Qdrant database to identify the precise normative and allied Indian Standards. It is built entirely on open-source technologies, ensuring security and zero-cost local inferencing.
 
 ## 4. Key Features
 
-- **Semantic Standard Search:** Search for standards using natural language, powered by HuggingFace vector embeddings.
-- **Tender Document Analysis:** Upload full PDF/DOCX procurement documents to automatically extract and map required IS codes.
-- **AI Chat with Standards:** Users can directly chat with the dense text of any standard to get immediate answers to complex engineering or compliance questions.
-- **Automated AI Summaries:** Generates 3-4 bullet point summaries for dense technical standards.
-- **Fast & Intuitive UI:** Modern Next.js interface providing an excellent user experience.
+- **Tender-as-a-Query & Semantic Discovery:** Replaces rigid keyword matching with meaning-based retrieval, instantly scanning the repository to find primary and allied standards based on complex technical requirements.
+- **Traceable Conversational Assistant:** Features a 'Chat with Document' widget powered by a Grounded RAG pipeline, providing expert answers linked directly to source clauses.
+- **Automated AI Summaries:** Generates precise 3-to-4 bullet point executive summaries of complex Indian Standards.
+- **Explainable Compliance Validation:** Surfaces requirement-standard gaps, conflicts, and risks using an LLM-assisted compliance audit.
 
 ## 5. Technology Stack
 
-- **Frontend:** Next.js (React), TailwindCSS
-- **Backend:** Python, FastAPI
-- **AI & ML:** HuggingFace `sentence-transformers`, Groq Cloud (Llama 3 LLM)
-- **Vector Database:** Qdrant Cloud
-- **Relational Database:** PostgreSQL (Supabase)
-- **Deployment:** Vercel (Frontend), Render (Backend), Docker
+- **Frontend:** Next.js (React, TypeScript), Tailwind CSS, GSAP
+- **Backend:** Python 3.12, FastAPI, Pydantic v2, SQLAlchemy
+- **Databases:** PostgreSQL (Relational Metadata), Qdrant (Vector Database)
+- **AI/ML:** HuggingFace `sentence-transformers` (MiniLM embeddings), Groq API (qwen-3.6-27b), PyMuPDF
+- **Infrastructure:** Docker, Docker Compose
 
 ## 6. Architecture
 
